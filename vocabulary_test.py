@@ -1,13 +1,16 @@
 import PySimpleGUI as sg
 import json
-
+words = {}
 def vocabulary_write(vocabulary, words):
-   
+   with open(vocabulary, encoding='utf-8') as voc:
+      data = json.load(voc)
+      data.update(words)
+      
    with open(vocabulary, 'w', encoding='utf-8') as voc:
-      json.dump(words, voc, ensure_ascii=False, indent=4)
+      json.dump(data, voc, ensure_ascii=False, indent=4)
 
 def vocabulary_read(vocabulary):
-   with open('vocab.json', encoding='utf-8') as voc:
+   with open(vocabulary, encoding='utf-8') as voc:
     data = json.load(voc)
     key_list = list(data.keys())
     return key_list[0], data[key_list[0]]
@@ -17,9 +20,9 @@ menu_def = [['&File', ['&Open', '&Save', 'E&xit', ]], ['Edit', ['Copy', 'Paste']
 
 # ----- Full layout -----
 left_column = sg.Column([[sg.Text('Creating dictionary', font='Any 18')],
-                         [sg.Text("Open dictionary:"), sg.Input(size=(25, 1), enable_events=False, key="-UPFILE-"),
-                            sg.FileBrowse('Browse'),],
-                         [sg.Text("Create dictionary:"), sg.Input(size=(25, 1), enable_events=False, key="-CRFILE-"),
+                         [sg.Text("Open dictionary:"), sg.Input(size=(25, 1), enable_events=True, key="-UPFILE-"),
+                            sg.FileBrowse('Browse', key='-UPBUT-'),],
+                         [sg.Text("Create dictionary:"), sg.Input(size=(25, 1), enable_events=True, key="-CRFILE-"),
                             sg.Button('Create', key="-CRBUT-"), ],
                          [sg.Text('Input russian word'), sg.Input( key="-RUS-")], 
                          [sg.Text('Input english word'), sg.Input(key="-ENG-")],
@@ -47,14 +50,33 @@ while True:
    if event == "Exit" or event == sg.WIN_CLOSED:
       break
    print(values)
+
+   if event == "-UPFILE-":
+      flag = 'update'
+      print(flag)
+
    if event == "-CRBUT-":
-      print(values['-CRFILE-'])
+      flag = 'create'
+      print(flag)
+
+   if event == '-CONFIRM-':
+      words[values['-RUS-']] = values['-ENG-']
+      if flag == 'update':
+         vocabulary = list(values['-UPFILE-'].split('/'))[-1]
+         print(vocabulary)
+         vocabulary_write(vocabulary, words)
+      if flag == 'create':
+         vocabulary = str(values['-CRFILE-'])+'.json'
+         with open(vocabulary, 'w', encoding='utf-8') as voc:
+            json.dump(words, voc, ensure_ascii=False, indent=4)
+      
 
    if event == "-FILE-":
       current_dict = list(values['-FILE-'].split('/'))[-1]
-      
+      print(current_dict)
    if event == "-GENERATE-":
       word_with_translate = vocabulary_read(current_dict)
+      window['-TRANSLATE-'].update('')
       window['-WORD-'].update(word_with_translate[0])
       check = word_with_translate[1]
 
