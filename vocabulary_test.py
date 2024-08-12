@@ -1,5 +1,6 @@
 import PySimpleGUI as sg
 import json
+import random
 words = {}
 def vocabulary_write(vocabulary, words): # Функция заполнения словаря
    with open(vocabulary, encoding='utf-8') as voc: # Чтение словаря в промежуточную переменную "data"
@@ -13,6 +14,7 @@ def vocabulary_read(vocabulary): # Чтение словаря
    with open(vocabulary, encoding='utf-8') as voc:
     data = json.load(voc)
     key_list = list(data.keys())
+    random.shuffle(key_list) # Перемешивает словарь для случайного выбора слова
     return key_list[0], data[key_list[0]] # Возврат пар "Слово - перевод"
 
 rightclick = ['&Edit', ['&Copy','&Paste']]
