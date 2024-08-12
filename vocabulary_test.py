@@ -39,6 +39,7 @@ right_column = sg.Column([[sg.Text('Run test', font='Any 18')],
                             sg.Input("", size=(25, 1), key='-WORD-', text_color='green', font=("BoldArial", 12),)], 
                            [sg.Text('Input ENGLISH translation'), sg.Input(size=(25, 1), enable_events=True, key='-TRANSLATE-')],
                            [sg.Button('Check', key='-CHECK-', expand_x=True)],
+                           [sg.Text('HELP!!!'), sg.Input(size=(15,1), key='-CLUES-'), sg.Button('CLUE', key='-CLUE-')],
                            [sg.Text('Result'), 
                             sg.Input('', size=(30, 1), key='-RESULT-', text_color='red', 
                              font=("BoldArial", 12))]])
@@ -77,8 +78,11 @@ while True:
 # Блок выбора словаря для тестирования
    if event == "-FILE-":
       current_dict = list(values['-FILE-'].split('/'))[-1]
+      attempt_counter = 0
+      seccess_counter = 0
 # Блок генерации слов      
    if event == "-GENERATE-":
+      attempt_counter += 1
       word_with_translate = vocabulary_read(current_dict) # Вызов функции прочтения очередной пары "слово - перевод" из выбранного словаря
       window['-TRANSLATE-'].update('')
       window['-WORD-'].update(word_with_translate[0])
@@ -90,12 +94,18 @@ while True:
    if event == "-CHECK-":
       try: # Защита от пустого выбора
          if translate == check:
-            window['-RESULT-'].update('ТЫ КРУТ!')
+            seccess_counter +=1
+            ball = (seccess_counter/attempt_counter)*100
+            window['-RESULT-'].update(f'ТЫ КРУТ! - {ball} %')
          else:
-            window['-RESULT-'].update('ХРЕНЬ')
+            ball = (seccess_counter/attempt_counter)*100
+            window['-RESULT-'].update(f'ХРЕНЬ - {ball} %')
       except NameError:
          window['-RESULT-'].update('НУ, ВВЕДИ ХОТЬ ЧТО-ТО, ДРУГ!')
-      
+   
+   if event == "-CLUE-":
+      attempt_counter += 1
+      window['-CLUES-'].update(check)
     
    
    
