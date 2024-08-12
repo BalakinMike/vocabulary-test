@@ -1,19 +1,19 @@
 import PySimpleGUI as sg
 import json
 words = {}
-def vocabulary_write(vocabulary, words):
-   with open(vocabulary, encoding='utf-8') as voc:
+def vocabulary_write(vocabulary, words): # Функция заполнения словаря
+   with open(vocabulary, encoding='utf-8') as voc: # Чтение словаря в промежуточную переменную "data"
       data = json.load(voc)
-      data.update(words)
+      data.update(words) # Объединение словаря и текущего словаря данной сессии "words"
       
-   with open(vocabulary, 'w', encoding='utf-8') as voc:
+   with open(vocabulary, 'w', encoding='utf-8') as voc: # Запись обновлённого словаря
       json.dump(data, voc, ensure_ascii=False, indent=4)
 
-def vocabulary_read(vocabulary):
+def vocabulary_read(vocabulary): # Чтение словаря 
    with open(vocabulary, encoding='utf-8') as voc:
     data = json.load(voc)
     key_list = list(data.keys())
-    return key_list[0], data[key_list[0]]
+    return key_list[0], data[key_list[0]] # Возврат пар "Слово - перевод"
 
 rightclick = ['&Edit', ['&Copy','&Paste']]
 menu_def = [['&File', ['&Open', '&Save', 'E&xit', ]], ['Edit', ['Copy', 'Paste'], ],  ['Help', 'About...'], ]
@@ -38,10 +38,10 @@ right_column = sg.Column([[sg.Text('Run test', font='Any 18')],
                            [sg.Text('Input ENGLISH translation'), sg.Input(size=(25, 1), enable_events=True, key='-TRANSLATE-')],
                            [sg.Button('Check', key='-CHECK-', expand_x=True)],
                            [sg.Text('Result'), 
-                            sg.Input('', size=(30, 1), key='-RESULT-', text_color='red', font=("BoldArial", 12))]])
-layout = [[left_column, sg.VerticalSeparator(), right_column],         
-          
-]
+                            sg.Input('', size=(30, 1), key='-RESULT-', text_color='red', 
+                             font=("BoldArial", 12))]])
+
+layout = [[left_column, sg.VerticalSeparator(), right_column]]
 
 window = sg.Window("VOCABULARY TEST", layout, right_click_menu=rightclick, finalize=True)
 
@@ -51,42 +51,42 @@ while True:
    if event == "Exit" or event == sg.WIN_CLOSED:
       break
    print(values)
-
+# Блок выбора существующего словаря
    if event == "-UPFILE-":
       flag = 'update'
-      vocabulary = list(values['-UPFILE-'].split('/'))[-1]
+      vocabulary = list(values['-UPFILE-'].split('/'))[-1] # Имя существующего словаря
       window['-DICT-'].update(vocabulary)
-
+# Блок создания нового словаря
    if event == "-CRBUT-":
       flag = 'create'
-      vocabulary = str(values['-CRFILE-'])+'.json'
+      vocabulary = str(values['-CRFILE-'])+'.json' # Имя нового словаря
       window['-DICT-'].update(vocabulary)
-
+# Блок заполнения словаря
    if event == '-CONFIRM-':
-      window['-RUS-'].update('')
+      window['-RUS-'].update('') # Очищение ячеек слов
       window['-ENG-'].update('')
-      words[values['-RUS-']] = values['-ENG-']
-      if flag == 'update':
-         vocabulary_write(vocabulary, words)
-      if flag == 'create':
+      words[values['-RUS-']] = values['-ENG-'] # Промежуточный, заполняемый в данной сессии словарь, далее загружаемый в постоянный
+      if flag == 'update': # Вызов функции заполнения существующего словаря
+         vocabulary_write(vocabulary, words) 
+      if flag == 'create': # Создание нового словаря
          with open(vocabulary, 'w', encoding='utf-8') as voc:
             json.dump(words, voc, ensure_ascii=False, indent=4)
       
-
+# Блок выбора словаря для тестирования
    if event == "-FILE-":
       current_dict = list(values['-FILE-'].split('/'))[-1]
-      print(current_dict)
+# Блок генерации слов      
    if event == "-GENERATE-":
-      word_with_translate = vocabulary_read(current_dict)
+      word_with_translate = vocabulary_read(current_dict) # Вызов функции прочтения очередной пары "слово - перевод" из выбранного словаря
       window['-TRANSLATE-'].update('')
       window['-WORD-'].update(word_with_translate[0])
       check = word_with_translate[1]
-
+# Блок вставки перевода (ответа пользователя на вопрос теста)
    if event == "-TRANSLATE-":
-       translate = values['-TRANSLATE-']  
-
+      translate = values['-TRANSLATE-']  
+# Блок проверки совпадения слова и перевода
    if event == "-CHECK-":
-      try:
+      try: # Защита от пустого выбора
          if translate == check:
             window['-RESULT-'].update('ТЫ КРУТ!')
          else:
