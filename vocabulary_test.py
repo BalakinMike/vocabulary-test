@@ -24,6 +24,7 @@ left_column = sg.Column([[sg.Text('Creating dictionary', font='Any 18')],
                             sg.FileBrowse('Browse', key='-UPBUT-'),],
                          [sg.Text("Create dictionary:"), sg.Input(size=(25, 1), enable_events=True, key="-CRFILE-"),
                             sg.Button('Create', key="-CRBUT-"), ],
+                         [sg.Text('You work with dictionary:'), sg.Input(size=(25, 1), enable_events=True, key="-DICT-")],
                          [sg.Text('Input russian word'), sg.Input( key="-RUS-")], 
                          [sg.Text('Input english word'), sg.Input(key="-ENG-")],
                          [sg.Button('Confirm update dictionary', key='-CONFIRM-', expand_x=True)]])
@@ -33,11 +34,11 @@ right_column = sg.Column([[sg.Text('Run test', font='Any 18')],
                             sg.FileBrowse('Browse'),],
                            [sg.Button('Generate', key='-GENERATE-', expand_x=True)],
                            [sg.Text('See RUSSIAN word'), 
-                            sg.Multiline("", size=(25, 1), key='-WORD-', text_color='green', font=("BoldArial", 12),)], 
+                            sg.Input("", size=(25, 1), key='-WORD-', text_color='green', font=("BoldArial", 12),)], 
                            [sg.Text('Input ENGLISH translation'), sg.Input(size=(25, 1), enable_events=True, key='-TRANSLATE-')],
                            [sg.Button('Check', key='-CHECK-', expand_x=True)],
                            [sg.Text('Result'), 
-                            sg.Multiline('', size=(30, 1), key='-RESULT-', text_color='red', font=("BoldArial", 12))]])
+                            sg.Input('', size=(30, 1), key='-RESULT-', text_color='red', font=("BoldArial", 12))]])
 layout = [[left_column, sg.VerticalSeparator(), right_column],         
           
 ]
@@ -53,20 +54,21 @@ while True:
 
    if event == "-UPFILE-":
       flag = 'update'
-      print(flag)
+      vocabulary = list(values['-UPFILE-'].split('/'))[-1]
+      window['-DICT-'].update(vocabulary)
 
    if event == "-CRBUT-":
       flag = 'create'
-      print(flag)
+      vocabulary = str(values['-CRFILE-'])+'.json'
+      window['-DICT-'].update(vocabulary)
 
    if event == '-CONFIRM-':
+      window['-RUS-'].update('')
+      window['-ENG-'].update('')
       words[values['-RUS-']] = values['-ENG-']
       if flag == 'update':
-         vocabulary = list(values['-UPFILE-'].split('/'))[-1]
-         print(vocabulary)
          vocabulary_write(vocabulary, words)
       if flag == 'create':
-         vocabulary = str(values['-CRFILE-'])+'.json'
          with open(vocabulary, 'w', encoding='utf-8') as voc:
             json.dump(words, voc, ensure_ascii=False, indent=4)
       
